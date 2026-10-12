@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study X - Student Companion</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- ================= ONBOARDING FLOW ================= -->
+    <div id="onboarding-overlay" class="onboarding-overlay">
+        <div class="onboarding-card">
+            
+            <!-- Step 0: Welcome / Get Started -->
+            <div class="ob-step active" id="ob-step-0">
+                <div class="ob-illustration">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h2>Always falling behind schedule? Let's fix that together.</h2>
+                <p class="ob-subtext">Welcome to <strong>Study X</strong> — your offline study workspace.</p>
+                <button class="btn-ob-primary" onclick="nextObStep()">Get Started</button>
+                <div class="ob-footer-legal">By continuing to use Study X you agree to local data terms.</div>
+            </div>
+
+            <!-- Step 1: Target Exam -->
+            <div class="ob-step" id="ob-step-1">
+                <h2>Your Target</h2>
+                <div class="target-toggle-group">
+                    <button class="target-toggle-btn active" id="btn-has-date" onclick="setTargetMode('date')">Yes, I have an exam date</button>
+                    <button class="target-toggle-btn" id="btn-no-date" onclick="setTargetMode('later')">Not yet, I'll set it later</button>
+                </div>
+                <div class="ob-input-container" id="target-inputs">
+                    <div class="ob-input-box">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <input type="text" id="ob-exam-name" placeholder="Exam Name (e.g. Class 8 Finals)">
+                    </div>
+                    <div class="ob-input-box">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        <input type="date" id="ob-exam-date">
+                    </div>
+                </div>
+                <button class="btn-ob-primary" onclick="nextObStep()">Continue</button>
+                <button class="btn-ob-text" onclick="skipTargetStep()">Skip for now</button>
+            </div>
+
+            <!-- Step 2: Biggest Struggle -->
+            <div class="ob-step" id="ob-step-2">
+                <h2>What's your biggest struggle?</h2>
+                <div class="struggle-options">
+                    <div class="struggle-card" onclick="selectStruggle(this)"><i class="fa-solid fa-hourglass-half"></i> <span>I never know how much time I have left</span></div>
+                    <div class="struggle-card" onclick="selectStruggle(this)"><i class="fa-solid fa-bars-staggered"></i> <span>I don't track what I've studied</span></div>
+                    <div class="struggle-card" onclick="selectStruggle(this)"><i class="fa-solid fa-expand"></i> <span>I can't stay focused while studying</span></div>
+                    <div class="struggle-card active" onclick="selectStruggle(this)"><i class="fa-solid fa-infinity"></i> <span>All of the above!</span></div>
+                </div>
+                <button class="btn-ob-primary" onclick="nextObStep()">Continue</button>
+            </div>
+
+            <!-- Step 3: Effort Level -->
+            <div class="ob-step" id="ob-step-3">
+                <h2>How much effort will you give?</h2>
+                <div class="effort-badge">
+                    <span id="effort-emoji">💪</span> <span id="effort-title">Intense</span>
+                    <small id="effort-hours">4 h/day</small>
+                </div>
+                <input type="range" id="effort-range" min="1" max="8" value="4" oninput="updateEffortVal(this.value)">
+                <button class="btn-ob-primary" onclick="nextObStep()">Continue</button>
+            </div>
+
+            <!-- Step 4: Everything Free -->
+            <div class="ob-step" id="ob-step-4">
+                <h2>Everything you need, Free.</h2>
+                <div class="free-feature-list">
+                    <div class="ff-item">
+                        <div class="ff-icon green"><i class="fa-solid fa-clock"></i></div>
+                        <div>
+                            <h4>Exam Countdown</h4>
+                            <p>Stop counting days. Start making them count.</p>
+                        </div>
+                    </div>
+                    <div class="ff-item">
+                        <div class="ff-icon teal"><i class="fa-solid fa-chart-line"></i></div>
+                        <div>
+                            <h4>Progress Tracking</h4>
+                            <p>Track your growth and see the results.</p>
+                        </div>
+                    </div>
+                    <div class="ff-item">
+                        <div class="ff-icon orange"><i class="fa-solid fa-hourglass"></i></div>
+                        <div>
+                            <h4>Focus Timer</h4>
+                            <p>Getting distracted? Let's get focused.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tag-free-forever">All free, forever. No Limits</div>
+                <button class="btn-ob-primary" onclick="completeOnboarding()">Next</button>
+            </div>
+
+            <!-- Onboarding Pagination Indicator -->
+            <div class="ob-dots" id="ob-dots">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= MAIN DASHBOARD FRAME ================= -->
+    <div class="app-layout">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar">
+            <div class="app-brand">
+                <i class="fa-solid fa-bolt-lightning"></i>
+                <span>Study X</span>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-link active" onclick="switchTab('exams', this)"><i class="fa-regular fa-clock"></i><span>Exams</span></button>
+                <button class="nav-link" onclick="switchTab('focus', this)"><i class="fa-solid fa-hourglass-half"></i><span>Focus</span></button>
+                <button class="nav-link" onclick="switchTab('ai', this)"><i class="fa-solid fa-fire-flame-curved"></i><span>Study AI</span></button>
+                <button class="nav-link" onclick="switchTab('syllabus', this)"><i class="fa-regular fa-bookmark"></i><span>Syllabus</span></button>
+                <button class="nav-link" onclick="switchTab('notes', this)"><i class="fa-regular fa-pen-to-square"></i><span>Notes</span></button>
+                <button class="nav-link" onclick="switchTab('todo', this)"><i class="fa-regular fa-square-check"></i><span>To-Do List</span></button>
+                <button class="nav-link" onclick="switchTab('more', this)"><i class="fa-regular fa-user"></i><span>More</span></button>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="content-area">
+
+            <!-- TAB 1: EXAMS COUNTDOWN -->
+            <section class="tab-page active" id="tab-exams">
+                <div class="header-title">
+                    <h1>Exam Countdown</h1>
+                    <button class="btn-pill-primary" onclick="openAddExamModal()"><i class="fa-solid fa-plus"></i> Add Exam</button>
+                </div>
+                <div class="countdown-hero-card" id="hero-countdown-box">
+                    <span class="cd-label" id="cd-title-display">Target Exam</span>
+                    <div class="cd-timer-grid">
+                        <div class="cd-unit"><span id="cd-days">00</span><label>Days</label></div>
+                        <div class="cd-unit"><span id="cd-hours">00</span><label>Hours</label></div>
+                        <div class="cd-unit"><span id="cd-mins">00</span><label>Mins</label></div>
+                        <div class="cd-unit"><span id="cd-secs">00</span><label>Secs</label></div>
+                    </div>
+                </div>
+                <div class="exam-list-container" id="exam-list">
+                    <!-- Dynamic Exam items -->
+                </div>
+            </section>
+
+            <!-- TAB 2: FOCUS TIMER -->
+            <section class="tab-page" id="tab-focus">
+                <div class="focus-timer-wrapper">
+                    <div class="dial-container">
+                        <div class="dial-time" id="timer-display">00:00:00</div>
+                        <div class="dial-subtext">SET GOAL OR START</div>
+                        <div class="dial-wave"></div>
+                    </div>
+
+                    <div class="tag-selector">
+                        <button class="tag-btn active" onclick="setFocusCategory('Study', this)"><i class="fa-solid fa-book-open"></i> Study</button>
+                        <button class="tag-btn" onclick="setFocusCategory('Revision', this)"><i class="fa-solid fa-arrows-rotate"></i> Revision</button>
+                        <button class="tag-btn" onclick="setFocusCategory('Misc', this)"><i class="fa-solid fa-puzzle-piece"></i> Misc</button>
+                    </div>
+
+                    <div class="dropdown-row">
+                        <select id="focus-subject-select" class="dark-select">
+                            <option value="">Subject</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Computer Applications">Computer Applications</option>
+                            <option value="Science">Science</option>
+                        </select>
+                        <select id="focus-chapter-select" class="dark-select">
+                            <option value="">Chapter</option>
+                            <option value="Chapter 1">Chapter 1</option>
+                            <option value="Chapter 2">Chapter 2</option>
+                        </select>
+                    </div>
+
+                    <div class="duration-pills">
+                        <button class="dur-pill active" onclick="setDurationPreset(0, this)">None</button>
+                        <button class="dur-pill" onclick="setDurationPreset(30, this)">30m</button>
+                        <button class="dur-pill" onclick="setDurationPreset(60, this)">60m</button>
+                        <button class="dur-pill" onclick="promptCustomDuration(this)"><i class="fa-solid fa-pen"></i> Custom</button>
+                    </div>
+
+                    <div class="timer-controls">
+                        <button class="control-btn circle" onclick="toggleMute()"><i class="fa-solid fa-bell" id="bell-icon"></i></button>
+                        <button class="control-btn circle play" id="play-timer-btn" onclick="toggleTimer()"><i class="fa-solid fa-play"></i></button>
+                        <button class="control-btn circle" onclick="resetTimer()"><i class="fa-solid fa-stop"></i></button>
+                    </div>
+
+                    <div class="planner-promo-card">
+                        <div class="promo-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                        <div class="promo-text">
+                            <h4>Study planner</h4>
+                            <p>Set a syllabus completion date and Study X plans every day up to your exam.</p>
+                            <button class="btn-sparkle" onclick="switchTab('syllabus')"><i class="fa-solid fa-sparkles"></i> Open Syllabus Planner</button>
+                        </div>
+                    </div>
+
+                    <div class="focus-quote">"Focus is the key to mastery."</div>
+                </div>
+            </section>
+
+            <!-- TAB 3: STUDY AI -->
+            <section class="tab-page" id="tab-ai">
+                <div class="ai-view-container">
+                    <div class="ai-card-promo">
+                        <h2>Most students study the wrong things.</h2>
+                        <p>Study X finds the gaps before your exam does.</p>
+                        <div class="ai-feature-row">
+                            <i class="fa-solid fa-crosshairs"></i>
+                            <div><strong>Know exactly what to study</strong><p>Study X analyzes your progress and tells you what to focus on next.</p></div>
+                        </div>
+                        <div class="ai-feature-row">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <div><strong>See if you're actually on track</strong><p>Get a real score: are you ahead, on track, or falling behind?</p></div>
+                        </div>
+                        <div class="ai-feature-row">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <div><strong>Never lose your progress</strong><p>Your study data syncs locally across your browser seamlessly.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: SYLLABUS -->
+            <section class="tab-page" id="tab-syllabus">
+                <div class="empty-state-card" id="syllabus-empty">
+                    <div class="empty-icon-circle"><i class="fa-solid fa-layer-group"></i></div>
+                    <h3>No Subjects Yet</h3>
+                    <p>Add a subject or import a syllabus to start.</p>
+                    <div class="empty-actions">
+                        <button class="btn-add-flat" onclick="addNewSubject()"><i class="fa-solid fa-plus"></i> Add Subject</button>
+                        <button class="btn-outline-flat" onclick="importSyllabus()"><i class="fa-solid fa-download"></i> Import Syllabus</button>
+                    </div>
+                </div>
+                <div id="syllabus-content" class="syllabus-list"></div>
+            </section>
+
+            <!-- TAB 5: NOTES -->
+            <section class="tab-page" id="tab-notes">
+                <div class="header-title">
+                    <h1>Notes & Resources</h1>
+                    <button class="btn-pill-primary" onclick="openAddNoteModal()"><i class="fa-solid fa-plus"></i> New Note</button>
+                </div>
+                <div id="notes-grid" class="notes-grid"></div>
+            </section>
+
+            <!-- TAB 6: TO-DO LIST -->
+            <section class="tab-page" id="tab-todo">
+                <div class="header-title">
+                    <h1>To-Do List</h1>
+                </div>
+                <div class="search-bar-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="todo-search" placeholder="Search tasks..." oninput="filterTasks()">
+                </div>
+                <div class="filter-tab-bar">
+                    <button class="ft-btn active" onclick="setTaskFilter('all', this)">All</button>
+                    <button class="ft-btn" onclick="setTaskFilter('active', this)">Active</button>
+                    <button class="ft-btn" onclick="setTaskFilter('completed', this)">Completed</button>
+                </div>
+                <div class="category-pills">
+                    <button class="cat-pill active" onclick="setCatFilter('all', this)"><i class="fa-solid fa-check"></i> All Categories</button>
+                    <button class="cat-pill" onclick="setCatFilter('personal', this)"># Personal</button>
+                    <button class="cat-pill" onclick="setCatFilter('general', this)"># General</button>
+                    <button class="cat-pill" onclick="setCatFilter('examprep', this)"># Exam Prep</button>
+                </div>
+
+                <div id="todo-list-container" class="todo-container"></div>
+
+                <div class="empty-todo-state" id="todo-empty" style="display:none;">
+                    <div class="todo-empty-icon"><i class="fa-regular fa-square-check"></i></div>
+                    <h3>All caught up!</h3>
+                    <p>Add a task to start organizing your study load.</p>
+                </div>
+
+                <button class="fab-add-task" onclick="openAddTaskModal()"><i class="fa-solid fa-plus"></i> Add Task</button>
+            </section>
+
+            <!-- TAB 7: MORE / SETTINGS -->
+            <section class="tab-page" id="tab-more">
+                <div class="header-title">
+                    <h1>Settings</h1>
+                </div>
+                <div class="more-container">
+                    
+                    <!-- ID Card Preview -->
+                    <div class="id-card-preview">
+                        <div class="id-header">INSTITUTE NAME</div>
+                        <div class="id-body">
+                            <div class="id-avatar"><i class="fa-solid fa-user"></i></div>
+                            <div class="id-info">
+                                <h3 id="id-name">Student Name</h3>
+                                <p id="id-class">Class / Program</p>
+                                <span id="id-roll">Roll No: —</span>
+                                <span id="id-reg">Reg No: —</span>
+                            </div>
+                            <button class="btn-edit-id" onclick="editProfileCard()"><i class="fa-solid fa-pen"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Account Panel -->
+                    <div class="settings-card">
+                        <div class="card-section-label">ACCOUNT</div>
+                        <div class="user-row">
+                            <div class="avatar-circle-sm" id="avatar-initial">A</div>
+                            <div class="user-details">
+                                <h4 id="account-name-disp">Student Name</h4>
+                                <p id="account-email-disp">student@studyx.app</p>
+                            </div>
+                        </div>
+                        <div class="action-btn-row">
+                            <button class="btn-danger-outline" onclick="resetAllData()"><i class="fa-solid fa-trash"></i> Reset Data</button>
+                            <button class="btn-success-outline"><i class="fa-solid fa-shield-check"></i> Local Mode Active</button>
+                        </div>
+                    </div>
+
+                    <!-- Study Tools Panel -->
+                    <div class="settings-card">
+                        <div class="card-section-label">STUDY TOOLS</div>
+                        <div class="list-setting-item" onclick="editProfileCard()">
+                            <i class="fa-solid fa-user-graduate"></i>
+                            <div>
+                                <h4>About You</h4>
+                                <p>Update your board, class level, and registered exams</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right arrow"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
